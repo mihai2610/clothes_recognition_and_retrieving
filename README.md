@@ -1,0 +1,2 @@
+# clothes_recognition_and_retrieving
+Clothes recognition and retrieving project

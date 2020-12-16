@@ -2,7 +2,7 @@ from flask import Flask, jsonify, json, request, Response, render_template, redi
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
-from .model.model import  ClothesDetectionModel
+from model.model import  ClothesDetectionModel
 
 app = Flask(__name__)
 detection_model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")

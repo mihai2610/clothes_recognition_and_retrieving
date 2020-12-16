@@ -77,7 +77,7 @@ class ClothesDetectionModel(object):
 
 		return result
 
-if __name__ == '__main__':
-	model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
-	path = os.path.join(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving\data\deepfashion\train\image", "000011.jpg")
-	print(model.get_image_label(path))
+# if __name__ == '__main__':
+# 	model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
+# 	path = os.path.join(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving\data\deepfashion\train\image", "000011.jpg")
+# 	print(model.get_image_label(path))

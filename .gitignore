@@ -131,4 +131,5 @@ dmypy.json
 
 data/
 docs/
+*.pt
 .idea/

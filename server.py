@@ -2,9 +2,10 @@ from flask import Flask, jsonify, json, request, Response, render_template, redi
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
+from .model.model import  ClothesDetectionModel
 
 app = Flask(__name__)
-
+detection_model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -14,7 +15,13 @@ def upload():
         filename = secure_filename(file.filename)
         filename, extension = os.path.splitext(filename)
         filename = filename + datetime.now().strftime("%d_%m_%Y %H_%M_%S") + extension
-        file.save(os.path.join('static/uploaded_images', filename))
+
+        file_path = os.path.join('static/uploaded_images', filename)
+
+        file.save(file_path)
+
+        detection_model.get_image_label(file_path)
+
         return jsonify({'filename': filename})
 
     return render_template('home.html', response1=False, upload_image=None)

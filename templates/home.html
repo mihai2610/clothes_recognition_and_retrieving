@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+        <title>Image Search Engine</title>
+		<!-- For IE -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<!-- For Resposive Device -->
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+		<!-- responsive style sheet -->
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/responsive.css') }}">
+
+		<!-- Fix Internet Explorer ______________________________________-->
+		<!--[if lt IE 9]>
+			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+			<script src="{{ url_for('static', filename='vendor/html5shiv.js') }}"></script>
+			<script src="{{ url_for('static', filename='vendor/respond.js') }}"></script>
+		<![endif]-->
+
+	</head>
+
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12 text-center" style="margin-top: 4rem; margin-bottom: 4rem">
+					<h1>
+						Image search engine for clothes
+					</h1>
+				</div>
+				<div class="col-md-2 offset-md-1">
+					<div class="form form-style-two" style="margin-bottom: 2rem;">
+
+						<div class="controls">
+							<div class="form-group">
+								<label>
+									Upload a picture of a clothing item and we will suggest similar products
+								</label>
+							</div>
+							<label for="image">
+								<a class="theme-button-two btn-upload" style="color:white; width: 200px;">Upload picture</a>
+							</label>
+							<input type="file"  accept="image/*" name="image" id="image" onchange="loadFile(event)" style="display: none;">
+
+						</div> <!-- /.controls -->
+					</div>
+					{% if upload_image %}
+						<img class="img-upload" src="{{ upload_image }}"  style="width: 200px !important">
+					{% endif %}
+				</div>
+				{% if items %}
+
+				<div class="col-md-7 offset-md-1">
+					<div class="slider-section element-section mb-200">
+						<div class="our-project project-minimal-style">
+							<div class="inner-wrapper">
+								<div class="project-minimal-slider">
+									{% for i in range(items|length) %}
+										 {% with index=i, item=items[i] %}
+											{% include "item.html" %}
+										{% endwith %}
+									{% endfor %}
+								</div> <!-- /.project-minimal-slider -->
+							</div> <!-- /.inner-wrapper -->
+						</div> <!-- /.our-project -->
+					</div>
+
+				</div>
+				{% else %}
+				<div class="col-md-6 offset-md-1">
+					<div class="default-section">
+							<img src="{{ url_for('static', filename='bg.jpg') }}">
+						</div>
+				</div>
+				{% endif %}
+
+			</div>
+		</div>
+
+
+
+
+    	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    	<!-- jQuery -->
+		<script src="{{ url_for('static', filename='vendor/jquery.2.2.3.min.js') }}"></script>
+		<!-- Popper js -->
+		<script src="{{ url_for('static', filename='vendor/popper.js/popper.min.js') }}"></script>
+		<!-- Bootstrap JS -->
+		<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+		<!-- WOW js -->
+		<script src="{{ url_for('static', filename='vendor/WOW-master/dist/wow.min.js') }}"></script>
+		<!-- owl.carousel -->
+		<script src="{{ url_for('static', filename='vendor/owl-carousel/owl.carousel.min.js') }}"></script>
+		<!-- Fancybox -->
+		<script src="{{ url_for('static', filename='vendor/fancybox/dist/jquery.fancybox.min.js') }}"></script>
+
+
+
+		<!-- Theme js -->
+		<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+	</body>
+</html>

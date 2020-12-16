@@ -1,0 +1,13 @@
+<div class="item item-{{ index }}">
+    <div class="project-item">
+        <div class="img-box">
+            <img class="item-img item-img-{{ index }}" src="{{item.image}}" alt="">
+        </div>
+        <div class="hover-valina">
+            <div>
+                <a href="{{ item.url }}" style="color: white;" target="_blank">Link for product</a>
+                <!--<a href="images/gallery/36.jpg" class="zoom fancybox" data-fancybox="gallery"><img src="{{ url_for('static', filename='images/icon/zoom-in.svg') }}" alt="" class="svg"></a>-->
+            </div>
+        </div> <!-- /.hover-valina -->
+    </div> <!-- /.project-item -->
+</div>

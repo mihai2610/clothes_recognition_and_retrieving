@@ -3,6 +3,48 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 from .model.model import  ClothesDetectionModel
+import json
+
+category_to_id = {
+	"short sleeve top":		1,
+	"long sleeve top":		2,
+	"short sleeve outwear":	4,
+	"long sleeve outwear":	4,
+	"vest":					4,
+	"sling":				6,
+	"shorts":				8,
+	"trousers":				8,
+	"skirt":				9,
+	"short sleeve dress":	10,
+	"long sleeve dress":	10,
+	"vest dress":			10,
+	"sling dress":			10
+}
+
+items = {}
+with open("filtered_clothes.json" , 'r') as outfile:
+    items = json.load(outfile)
+
+def get_recommendation(predicted_items, max_items = 3, max_pictures = 3):
+	recommendations = []
+	
+	for pred in predicted_items:
+		id = category_to_id[pred]
+		recommendations_count = max_items
+		
+		for item in items:
+			if item["category_id"] == id:
+				recommendations += item["images"][0:max_pictures]
+				recommendations_count -= 1
+
+			if recommendations_count <= 0:
+				break
+	
+	return recommendations
+
+rec = get_recommendation(["sling dress", "vest"],1,1)
+
+print(rec)
 
 app = Flask(__name__)
 detection_model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
@@ -51,3 +93,33 @@ def main():
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8001, debug=True)
+
+
+# initial_category_to_id = {
+	# "short sleeve top":1,
+	# "long sleeve top":2,
+	# "short sleeve outwear":3,
+	# "long sleeve outwear":4,
+	# "vest":5,
+	# "sling":6,
+	# "shorts":7,
+	# "trousers":8,
+	# "skirt":9,
+	# "short sleeve dress":10,
+	# "long sleeve dress":11,
+	# "vest dress":12,
+	# "sling dress":13
+# }
+
+# categories = {
+    # "fuste" : 9,
+    # "rochii" : 10,
+    # "tricouri" : 1,
+    # "pantaloni" : 8,
+    # "geci": 4,
+    # "curele":6,
+    # "camasi": 2,
+    # "bluze":2,
+    # "sacouri":2,
+    # "pulovere":2
+# }

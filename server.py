@@ -78,7 +78,15 @@ def main():
 	if filename:
 		file_path = 'uploaded_images/' + filename
 		upload_image = url_for('static', filename=file_path)
+
+		img_path = os.path.join('static', file_path)
+
+		# return a dictionary with labels and scores
 		results = detection_model.get_image_label(os.path.join('static', file_path))
+
+		# return the dominant color of the first box
+		detection_model.dominant_box_color(img_path)
+
 		print(results)
 
 		_results = [res for res in results.keys() if results[res] > 0.7]

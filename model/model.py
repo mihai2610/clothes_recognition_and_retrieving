@@ -150,10 +150,9 @@ class ClothesDetectionModel(object):
 		labels = prediction[0]['labels'].cpu().numpy()
 		scores = prediction[0]['scores'].cpu().numpy()
 
-		for idx in range(3):
-			if idx >= len(labels):
-				break
-			result[categories[labels[idx]]] = scores[idx]
+		for idx in range(len(labels)):
+			if result.get(categories[labels[idx]]) is None:
+				result[categories[labels[idx]]] = scores[idx]
 
 		return result
 

@@ -34,7 +34,8 @@ def get_recommendation(predicted_items, main_color, main_vector, is_color, max_i
 		items = json.load(outfile)
 
 	dists = []
-	print(category_to_id[predicted_items[0]])
+	print("category_to_id[predicted_items[0]]", category_to_id[predicted_items[0]])
+
 	for item in items:
 		if item["category_id"] == category_to_id[predicted_items[0]]:
 			_item = item["images"][0]
@@ -122,6 +123,7 @@ def main():
 
 		# return a dictionary with labels and scores
 		results = detection_model.get_image_label(os.path.join('static', file_path))
+		print("results", results)
 		vector = detection_model.get_vector()
 
 		max_score = max(results.values())

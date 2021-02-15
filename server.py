@@ -127,7 +127,7 @@ def main():
 		vector = detection_model.get_vector()
 
 		max_score = max(results.values())
-		if max_score <= 0.7:
+		if max_score <= 0.60:
 			results = []
 		else:
 			key = list(results.keys())[list(results.values()).index(max_score)]
@@ -139,29 +139,6 @@ def main():
 		items = get_recommendation(results, main_color, vector, is_color)
 
 	return render_template('home.html', items=items, upload_image=upload_image)
-
-
-def save_image_color():
-	with open("data/all_clothes.json", 'r') as outfile:
-		items = json.load(outfile)
-
-	index = 0
-	bad_values = [0]
-	for item in items:
-		if index % 10 == 0:
-			print(index)
-		index += 1
-
-		image_path = r"" + item['local_images'][0]
-		if os.path.exists(image_path):
-			item['rgb_color'] = list(detection_model.dominant_box_color(image_path, bad_values))
-		else:
-			print("no_image")
-
-	print("bad_values", bad_values)
-
-	with open("data/all_clothes.json", 'w') as outfile:
-		json.dump(items, outfile)
 
 
 if __name__ == "__main__":

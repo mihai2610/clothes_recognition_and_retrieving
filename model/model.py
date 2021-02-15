@@ -83,7 +83,7 @@ class ClothesDetectionModel(object):
 
 	def dominant_colors(self, img):
 		# convert to rgb from bgr
-		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+		img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
 		# reshaping to a list of pixels
 		img = img.reshape((img.shape[0] * img.shape[1], 3))
@@ -108,7 +108,7 @@ class ClothesDetectionModel(object):
 
 	def dominant_box_color(self, img_path, bad_converts=None):
 		img = cv2.imread(img_path)
-		boxes = self.get_image_boxes(img)
+		boxes = self.get_image_boxes(Image.open(img_path).convert("RGB"))
 
 		# for box_key in boxes:
 		# 	box = boxes[box_key].astype(int)
@@ -116,21 +116,23 @@ class ClothesDetectionModel(object):
 		if len(boxes) < 1:
 			if bad_converts:
 				bad_converts[0] += 1
-			return []
-
-		# cv2.imshow('image', _img)
-		# cv2.waitKey(0)
+			_img = img
 
 		box = boxes[list(boxes.keys())[0]].astype(int)
 
 		if img.shape[0] <= box[0] or img.shape[1] <= box[1]:
 			if bad_converts:
 				bad_converts[0] += 1
-			return []
+			_img = img[min(box[1],  img.shape[1]): box[3], min(box[0],  img.shape[0]): box[2]]
 		else:
-			_img = img[box[0]: box[2], box[1]: box[3]]
+			_img = img[box[1]: box[3], box[0]: box[2]]
+
+		# cv2.imshow('image', _img)
+		# cv2.waitKey(0)
 
 		color = [int(color) for color in self.dominant_colors(_img)]
+
+		# print("color = ", color)
 
 		return color
 
@@ -172,7 +174,7 @@ class ClothesDetectionModel(object):
 		for idx in range(3):
 			if idx >= len(scores):
 				break
-			if scores[idx] > 0.7:
+			if scores[idx] > 0.6:
 				result[categories[labels[idx]]] = boxes[idx]
 
 		return result
@@ -217,8 +219,35 @@ def save_image_vector():
 	with open("data/all_clothes.json", 'w') as outfile:
 		json.dump(items, outfile)
 
-# save_image_vector()
+
+def save_image_color():
+	source_path = r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving"
+	detection_model = ClothesDetectionModel(source_path)
+
+	with open(source_path + r"\data\all_clothes.json", 'r') as outfile:
+		items = json.load(outfile)
+
+	index = 0
+	bad_values = [0]
+	for item in items:
+		if index % 10 == 0:
+			print(index)
+		index += 1
+		image_path = r"" + str(item['local_images'][0]).replace("clothes_data_etapa3", source_path + r"\data")
+		if os.path.exists(image_path):
+			item['rgb_color'] = list(detection_model.dominant_box_color(image_path, bad_values))
+		else:
+			print("no_image")
+
+	print("bad_values", bad_values)
+
+	with open(source_path + r"\data\all_clothes.json", 'w') as outfile:
+		json.dump(items, outfile)
+
+
 
 # if __name__ == '__main__':
+# 	save_image_vector()
+# 	save_image_color()
 # 	path = os.path.join(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving\data\deepfashion\train\image", "000011.jpg")
 # 	print(model.get_image_label(path))

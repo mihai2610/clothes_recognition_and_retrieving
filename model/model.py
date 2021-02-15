@@ -11,6 +11,7 @@ import numpy as np
 from collections import Counter
 
 from PIL import Image, ImageFont, ImageDraw, ImageEnhance
+import json
 
 
 class ToTensor(object):
@@ -30,9 +31,7 @@ class Compose(object):
 
 
 def get_transform():
-	transforms = []
-	transforms.append(ToTensor())
-	return Compose(transforms)
+	return Compose([ToTensor()])
 
 
 num_classes = 13
@@ -66,7 +65,21 @@ class ClothesDetectionModel(object):
 
 		self.model.to(self.device)
 
+		self.activation = {}
+
 		self.n_clusters = 3
+
+	def get_activation(self, name):
+		def hook(model, input, output):
+			if name not in self.activation.keys():
+				self.activation[name] = [output.detach()]
+			else:
+				self.activation[name].append(output.detach())
+
+		# print("activation name", self.activation[name])
+		# print("activation", self.activation)
+
+		return hook
 
 	def dominant_colors(self, img):
 		# convert to rgb from bgr
@@ -93,22 +106,32 @@ class ClothesDetectionModel(object):
 
 		return COLORS.astype(int)[max_cluster]
 
-	def dominant_box_color(self, img_path):
+	def dominant_box_color(self, img_path, bad_converts=None):
 		img = cv2.imread(img_path)
-
 		boxes = self.get_image_boxes(img)
 
 		# for box_key in boxes:
 		# 	box = boxes[box_key].astype(int)
 
-		box = boxes[list(boxes.keys())[0]].astype(int)
-		_img = img[box[0]: box[2], box[1]: box[3]]
+		if len(boxes) < 1:
+			if bad_converts:
+				bad_converts[0] += 1
+			return []
 
 		# cv2.imshow('image', _img)
 		# cv2.waitKey(0)
 
-		color = self.dominant_colors(_img)
-		print("color: ", color)
+		box = boxes[list(boxes.keys())[0]].astype(int)
+
+		if img.shape[0] <= box[0] or img.shape[1] <= box[1]:
+			if bad_converts:
+				bad_converts[0] += 1
+			return []
+		else:
+			_img = img[box[0]: box[2], box[1]: box[3]]
+
+		color = [int(color) for color in self.dominant_colors(_img)]
+
 		return color
 
 	def color_dist(self, color1, color2):
@@ -128,6 +151,8 @@ class ClothesDetectionModel(object):
 		scores = prediction[0]['scores'].cpu().numpy()
 
 		for idx in range(3):
+			if idx >= len(labels):
+				break
 			result[categories[labels[idx]]] = scores[idx]
 
 		return result
@@ -146,12 +171,55 @@ class ClothesDetectionModel(object):
 		scores = prediction[0]['scores'].cpu().numpy()
 
 		for idx in range(3):
+			if idx >= len(scores):
+				break
 			if scores[idx] > 0.7:
 				result[categories[labels[idx]]] = boxes[idx]
 
 		return result
 
+	def vector_distance(self, x1, x2):
+		return np.linalg.norm(np.asarray(x1) - np.asarray(x2))
+
+	def get_vector(self):
+		return torch.sum(self.activation['fc6'][-1], dim=0).tolist()
+
+	def init_hook(self):
+		i = 0
+		for child in self.model.roi_heads.children():
+			if i == 1:
+				for layer in child.children():
+					layer.register_forward_hook(self.get_activation('fc6'))
+					break
+			i += 1
+
+
+def save_image_vector():
+	detection_model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
+	detection_model.init_hook()
+
+	with open("data/all_clothes.json", 'r') as outfile:
+		items = json.load(outfile)
+
+	index = 0
+	for item in items:
+		index += 1
+		if index <= 1000:
+			continue
+
+		image_path = r"" + item['local_images'][0]
+		if os.path.exists(image_path):
+			detection_model.get_image_label(image_path)
+			item['vector'] = torch.sum(detection_model.activation['fc6'][-1], dim=0).tolist()
+
+		if index % 10 == 0:
+			print(index)
+
+	with open("data/all_clothes.json", 'w') as outfile:
+		json.dump(items, outfile)
+
+# save_image_vector()
+
 # if __name__ == '__main__':
-# 	model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
 # 	path = os.path.join(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving\data\deepfashion\train\image", "000011.jpg")
 # 	print(model.get_image_label(path))

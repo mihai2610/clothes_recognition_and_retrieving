@@ -85,9 +85,9 @@ def main():
 		results = detection_model.get_image_label(os.path.join('static', file_path))
 
 		# return the dominant color of the first box
-		detection_model.dominant_box_color(img_path)
+		color = detection_model.dominant_box_color(img_path)
 
-		print(results)
+		print(results, color)
 
 		_results = [res for res in results.keys() if results[res] > 0.7]
 		print(_results)

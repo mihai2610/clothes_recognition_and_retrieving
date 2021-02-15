@@ -137,3 +137,4 @@ images/
 *.jpg
 *.jfif
 *.png
+static/uploaded_images/

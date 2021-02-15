@@ -21,15 +21,15 @@ category_to_id = {
 	"sling dress": 10
 }
 
-
 app = Flask(__name__)
 detection_model = ClothesDetectionModel(r"D:\master\an2\SRI\project\clothes_recognition_and_retrieving")
 detection_model.init_hook()
 
+
 def get_recommendation(predicted_items, main_color, main_vector, is_color, max_items=10):
 	recommendations = []
-
 	items = {}
+
 	with open("data/all_clothes.json", 'r') as outfile:
 		items = json.load(outfile)
 
@@ -51,22 +51,22 @@ def get_recommendation(predicted_items, main_color, main_vector, is_color, max_i
 
 			recommendations.append({"image": _item, "url": _page, "price": str(item['lei']) + " RON"})
 
-	top_recommandations = []
-	current_recomm_vector = dists
+	top_recommendations = []
+	current_recommendation_vector = dists
 	while max_items:
-		min_dist = min(current_recomm_vector)
-		print(min_dist)
-		index = current_recomm_vector.index(min_dist)
+		min_dist = min(current_recommendation_vector)
+		print("min_dist", min_dist)
+		index = current_recommendation_vector.index(min_dist)
 
-		top_recommandations.append(recommendations[index])
+		top_recommendations.append(recommendations[index])
 		recommendations.pop(index)
-		current_recomm_vector.pop(index)
+		current_recommendation_vector.pop(index)
 
 		max_items -= 1
 
-	print(top_recommandations)
-	return top_recommandations
+	print("top_recommendations", top_recommendations)
 
+	return top_recommendations
 
 
 def get_files_name(dir_name='data/images'):
@@ -75,6 +75,12 @@ def get_files_name(dir_name='data/images'):
 		paths.append(dir_name + "/" + path)
 
 	return paths
+
+
+def reset_uploaded_images_folder(filename=None):
+	for file in os.listdir('static/uploaded_images'):
+		if file != filename:
+			os.remove(os.path.join('static', 'uploaded_images', file))
 
 
 @app.route('/upload', methods=['POST'])
@@ -99,12 +105,16 @@ def upload():
 def main():
 	filename = request.args.get('filename', '')
 	is_color = request.args.get('is_color', True)
+
 	if is_color == 'false':
 		is_color = False
 
 	upload_image = None
 	items = None
+
 	if filename:
+		reset_uploaded_images_folder(filename)
+
 		file_path = 'uploaded_images/' + filename
 		upload_image = url_for('static', filename=file_path)
 
@@ -154,4 +164,3 @@ def save_image_color():
 
 if __name__ == "__main__":
 	app.run(host='127.0.0.1', port=8001, debug=True)
-

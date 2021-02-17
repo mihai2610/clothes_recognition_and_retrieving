@@ -81,6 +81,20 @@ class ClothesDetectionModel(object):
 
 		return hook
 
+	def display_boxes(self, img, boxes, scores, labels):
+		_img = img
+		draw = ImageDraw.Draw(_img)
+		idx = 0
+
+		for box in boxes:
+			if scores[idx] > 0.5:
+				draw.rectangle(((box[0], box[1]), (box[2], box[3])))
+				draw.text((box[0], box[1]), categories[labels[idx]]+" "+str(scores[idx]), fill=(0, 0, 0, 0))
+
+			idx += 1
+
+		_img.show()
+
 	def dominant_colors(self, img):
 		# convert to rgb from bgr
 		img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
@@ -123,7 +137,7 @@ class ClothesDetectionModel(object):
 		if img.shape[0] <= box[0] or img.shape[1] <= box[1]:
 			if bad_converts:
 				bad_converts[0] += 1
-			_img = img[min(box[1],  img.shape[1]): box[3], min(box[0],  img.shape[0]): box[2]]
+			_img = img[min(box[1], img.shape[1]): box[3], min(box[0], img.shape[0]): box[2]]
 		else:
 			_img = img[box[1]: box[3], box[0]: box[2]]
 
@@ -132,7 +146,7 @@ class ClothesDetectionModel(object):
 
 		color = [int(color) for color in self.dominant_colors(_img)]
 
-		# print("color = ", color)
+		print("color = ", color)
 
 		return color
 
@@ -171,6 +185,8 @@ class ClothesDetectionModel(object):
 		boxes = prediction[0]['boxes'].cpu().numpy()
 		scores = prediction[0]['scores'].cpu().numpy()
 
+		# self.display_boxes(image, boxes, scores, labels)
+
 		for idx in range(3):
 			if idx >= len(scores):
 				break
@@ -181,6 +197,8 @@ class ClothesDetectionModel(object):
 
 	def vector_distance(self, x1, x2):
 		return np.linalg.norm(np.asarray(x1) - np.asarray(x2))
+
+	# return np.dot(x1, x2) / (np.linalg.norm(x1) * np.linalg.norm(x2))
 
 	def get_vector(self):
 		return torch.sum(self.activation['fc6'][-1], dim=0).tolist()
@@ -243,8 +261,6 @@ def save_image_color():
 
 	with open(source_path + r"\data\all_clothes.json", 'w') as outfile:
 		json.dump(items, outfile)
-
-
 
 # if __name__ == '__main__':
 # 	save_image_vector()
